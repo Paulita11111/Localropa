@@ -184,7 +184,22 @@ def mostrar_dataframe():
     else:
         print("No se pudo convertir la base de datos a DataFrame.")
 
-
+# Función para obtener productos con precios en euros
+def get_products_in_eur():
+    euro_rate = obtener_valores_dolar()
+    if euro_rate:
+        with sqlite3.connect(DATABASE) as conn:
+            products = conn.execute("SELECT * FROM product_catalog").fetchall()
+            products_in_eur = []
+            for product in products:
+                product_dict = dict(product)
+                product_dict['sale_price_euro'] = product_dict['sale_price'] * euro_rate
+                product_dict['market_price_euro'] = product_dict['market_price'] * euro_rate
+                products_in_eur.append(product_dict)
+            return products_in_eur
+    else:
+        print("No se pudo obtener el valor del euro.")
+        return []
 
 # Función principal para inicializar la base de datos y la importación de productos
 def iniciar():
@@ -209,6 +224,8 @@ def menu_interactivo():
     8. Mostrar productos con precios en euros
     9. Mostrar productos como DataFrame
     10. Ver gráficos descriptivos
+    11. Obtener productos con precios en euros
+
     0. Salir
     """
     opcion = -1
@@ -263,6 +280,8 @@ def menu_interactivo():
                 print("Opción no válida.")
         except ValueError:
             print("Ingrese un número válido.")
+
+
 
 
 if __name__ == "__main__":

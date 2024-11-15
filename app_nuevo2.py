@@ -36,7 +36,7 @@ def get_product(id):
 # Endpoint para añadir un nuevo producto
 @app.route("/products", methods=["POST"])
 def add_product():
-    product_details = request.get_json()  # Obtener datos del producto desde el cuerpo de la solicitud
+    product_details = request.json  # Obtener datos del producto desde el cuerpo de la solicitud
     db_nuevo1.add_product(product_details)  # Añadir el producto a la base de datos
     return jsonify({"message": "Product successfully created"}), 201
 
@@ -56,33 +56,9 @@ def delete_product(id):
     return jsonify({"message": "Product successfully deleted"}), 200
 
 
-@app.route("/products/eur", methods=["GET"])
-def get_products_euro():
-    valor_euro = db_nuevo1.obtener_valores_dolar()  # Obtener el valor del euro
-    if valor_euro is None:
-        return jsonify({"message": "Error al obtener el valor del euro"}), 500
-
-    products = db_nuevo1.get_products()
-    result = [
-        {
-            "id": product["rowid"],
-            "index": product["index"],
-            "product": product["product"],
-            "category": product["category"],
-            "sub_category": product["sub_category"],
-            "brand": product["brand"],
-            "sale_price": product["sale_price"] / valor_euro,  # Conversión de precio a euros
-            "market_price": product["market_price"] / valor_euro,  # Conversión de precio a euros
-            "type": product["type"],
-            "rating": product["rating"],
-            "description": product["description"],
-        }
-        for product in products
-    ]
-    return jsonify(result), 200
-
-
 if __name__ == "__main__":
     db_nuevo1.crear_tabla()  # Crear tabla si no existe
     db_nuevo1.importar_productos()  # Importar productos desde el CSV
     app.run(debug=True)  # Iniciar el servidor de Flask
+
+

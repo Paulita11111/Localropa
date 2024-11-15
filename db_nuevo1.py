@@ -1,6 +1,8 @@
 import sqlite3
 import requests
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 from flask import Flask, jsonify, request
 
 DATABASE = "base1.db"
@@ -136,6 +138,43 @@ def db_to_dataframe():
         print(f"Error al convertir la base de datos a DataFrame: {e}")
         return None
 
+# Función para crear gráficos descriptivos
+def graficos_descriptivos(df):
+    # Gráfico de distribución de precios de venta
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df['sale_price'], kde=True, color='blue', bins=30)
+    plt.title("Distribución de Precios de Venta")
+    plt.xlabel("Precio de Venta")
+    plt.ylabel("Frecuencia")
+    plt.show()
+
+    # Gráfico de distribución de precios de mercado
+    plt.figure(figsize=(10, 6))
+    sns.histplot(df['market_price'], kde=True, color='green', bins=30)
+    plt.title("Distribución de Precios de Mercado")
+    plt.xlabel("Precio de Mercado")
+    plt.ylabel("Frecuencia")
+    plt.show()
+
+    # Gráfico de categorías de productos
+    plt.figure(figsize=(10, 6))
+    sns.countplot(data=df, x='category', palette='viridis')
+    plt.title("Distribución de Productos por Categoría")
+    plt.xlabel("Categoría")
+    plt.ylabel("Cantidad de Productos")
+    plt.xticks(rotation=45, ha='right')
+    plt.show()
+
+    # Gráfico de rating promedio por categoría
+    plt.figure(figsize=(10, 6))
+    avg_rating_by_category = df.groupby('category')['rating'].mean().sort_values(ascending=False)
+    avg_rating_by_category.plot(kind='bar', color='purple')
+    plt.title("Rating Promedio por Categoría")
+    plt.xlabel("Categoría")
+    plt.ylabel("Rating Promedio")
+    plt.xticks(rotation=45, ha='right')
+    plt.show()
+
 # Función para mostrar el DataFrame
 def mostrar_dataframe():
     df = db_to_dataframe()
@@ -169,6 +208,7 @@ def menu_interactivo():
     7. Eliminar un producto
     8. Mostrar productos con precios en euros
     9. Mostrar productos como DataFrame
+    10. Ver gráficos descriptivos
     0. Salir
     """
     opcion = -1
@@ -211,6 +251,12 @@ def menu_interactivo():
                         print(product)
             elif opcion == 9:
                 mostrar_dataframe()  # Llamamos a la nueva función para mostrar el DataFrame
+            elif opcion == 10:
+                df = db_to_dataframe()
+                if df is not None:
+                    graficos_descriptivos(df)  # Llamamos a la función para graficar
+                else:
+                    print("No se pudo generar los gráficos.")
             elif opcion == 0:
                 print("Saliendo...")
             else:

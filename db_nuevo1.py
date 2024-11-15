@@ -125,6 +125,28 @@ def obtener_valores_dolar():
         print(f"Error al obtener los datos de la API: {e}")
         return None
 
+# Función para convertir la base de datos a DataFrame
+def db_to_dataframe():
+    try:
+        with sqlite3.connect(DATABASE) as conn:
+            # Leemos todos los productos de la tabla en un DataFrame
+            df = pd.read_sql_query("SELECT rowid, * FROM product_catalog", conn)
+        return df
+    except Exception as e:
+        print(f"Error al convertir la base de datos a DataFrame: {e}")
+        return None
+
+# Función para mostrar el DataFrame
+def mostrar_dataframe():
+    df = db_to_dataframe()
+    if df is not None:
+        print("Contenido de la base de datos:")
+        print(df)  # Mostrar el DataFrame
+    else:
+        print("No se pudo convertir la base de datos a DataFrame.")
+
+
+
 # Función principal para inicializar la base de datos y la importación de productos
 def iniciar():
     try:
@@ -146,6 +168,7 @@ def menu_interactivo():
     6. Actualizar un producto existente
     7. Eliminar un producto
     8. Mostrar productos con precios en euros
+    9. Mostrar productos como DataFrame
     0. Salir
     """
     opcion = -1
@@ -186,6 +209,8 @@ def menu_interactivo():
                     products = get_products()
                     for product in products:
                         print(product)
+            elif opcion == 9:
+                mostrar_dataframe()  # Llamamos a la nueva función para mostrar el DataFrame
             elif opcion == 0:
                 print("Saliendo...")
             else:

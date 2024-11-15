@@ -67,8 +67,8 @@ def get_product(id):
         return dict(product)
 
 # Función para añadir un nuevo producto
-def add_product():
-    new_product = request.get_json()
+def add_product(new_product):
+    #new_product = request.get_json()
     with sqlite3.connect(DATABASE) as conn:
         conn.execute(''' 
             INSERT INTO product_catalog (
@@ -134,5 +134,66 @@ def iniciar():
     except Exception as e:
         print(f"An error occurred: {e}")
 
+# Menú interactivo
+def menu_interactivo():
+    textoMenu = """
+    Ingrese una opción:
+    1. Crear tablas
+    2. Importar productos desde CSV
+    3. Consultar todos los productos
+    4. Consultar un producto por ID
+    5. Añadir un nuevo producto
+    6. Actualizar un producto existente
+    7. Eliminar un producto
+    8. Mostrar productos con precios en euros
+    0. Salir
+    """
+    opcion = -1
+    while opcion != 0:
+        print(textoMenu)
+        try:
+            opcion = int(input("Seleccione una opción: "))
+            if opcion == 1:
+                crear_tabla()
+            elif opcion == 2:
+                importar_productos()
+            elif opcion == 3:
+                products = get_products()
+                for product in products:
+                    print(dict(product))
+            elif opcion == 4:
+                id = int(input("Ingrese el ID del producto: "))
+                product = get_product(id)
+                print(product)
+            elif opcion == 5:
+                add_product()
+            elif opcion == 6:
+                id = int(input("Ingrese el ID del producto a actualizar: "))
+                update_product(id)
+            elif opcion == 7:
+                id = int(input("Ingrese el ID del producto a eliminar: "))
+                delete_product(id)
+            elif opcion == 8:
+                euro_rate = obtener_valores_dolar()
+                if euro_rate:
+                    with sqlite3.connect(DATABASE) as conn:
+                        conn.execute(''' 
+                            UPDATE product_catalog
+                            SET sale_price_euro = sale_price * ?, 
+                                market_price_euro = market_price * ?
+                        ''', (euro_rate, euro_rate))
+                        conn.commit()
+                    products = get_products()
+                    for product in products:
+                        print(product)
+            elif opcion == 0:
+                print("Saliendo...")
+            else:
+                print("Opción no válida.")
+        except ValueError:
+            print("Ingrese un número válido.")
+
+
 if __name__ == "__main__":
     iniciar()
+    menu_interactivo()
